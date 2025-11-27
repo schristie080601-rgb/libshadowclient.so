@@ -1,0 +1,58 @@
+name: Build libshadowclient.so
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_PLATFORM: "android-21"
+      NDK_VERSION: "r23b"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Install unzip
+        run: sudo apt-get update && sudo apt-get install -y unzip
+
+      - name: Download Android NDK
+        run: |
+          NDK_URL="https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip"
+          curl -sSL "$NDK_URL" -o ndk.zip
+          unzip -q ndk.zip -d ndk
+          echo "NDK_DIR=$(pwd)/ndk/android-ndk-${NDK_VERSION}" >> $GITHUB_ENV
+
+      - name: Build for ABIs
+        run: |
+          export ANDROID_NDK_HOME="$NDK_DIR"
+          for ABI in arm64-v8a armeabi-v7a; do
+            echo "=== Building for $ABI ==="
+            BUILD_DIR=build-$ABI
+            mkdir -p $BUILD_DIR
+            pushd $BUILD_DIR
+            cmake -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DANDROID_PLATFORM=$ANDROID_PLATFORM ../app
+            cmake --build . --target shadowclient -j$(nproc)
+            popd
+          done
+
+      - name: Collect built .so files
+        run: |
+          mkdir -p artifacts
+          find app/src/main/jniLibs -type f -name "libshadowclient.so" -print -exec cp -v {} artifacts/ \; || true
+          ls -la artifacts || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libshadowclient
+          path: artifacts
