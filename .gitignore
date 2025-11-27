@@ -1,9 +1,40 @@
-# Android / Java / Gradle
+# Gradle / build
 .gradle/
 build/
-*/build/
+**/build/
+
+# Local config
 local.properties
-.idea/
+
+# Android Studio / IDE
+/.idea/
 *.iml
-*.keystore
+captures/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Native build / CMake
+.externalNativeBuild/
+.cxx/
+
+# Keystores and sensitive files
 *.jks
+*.keystore
+keystore.properties
+
+# Logs and temp
+*.log
+tmp/
+
+# Optional: ignore packaged APKs
+*.apk
+*.ap_
+
+# IDE / Editor
+.vscode/
+
+# NOTE: If you plan to commit built .so files, DO NOT ignore app/src/main/jniLibs/
+# Uncomment the next line to ignore generated .so files:
+# app/src/main/jniLibs/
