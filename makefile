@@ -2,8 +2,8 @@
 CXX = g++
 CXXFLAGS = -Wall -fPIC -O2
 
-# Source files (add all your .cpp files here)
-SRC = modmenu.cpp hooks.cpp utils.cpp
+# Automatically find all .cpp files in the current directory
+SRC = $(wildcard *.cpp)
 
 # Object files
 OBJ = $(SRC:.cpp=.o)
